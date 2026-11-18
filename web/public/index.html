@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playlist Zipper</title>
+<style>
+  :root { --bg:#0e0f12; --card:#17191e; --line:#2a2d35; --text:#eceef2; --muted:#8b909c; --accent:#ff6a1a; --ok:#3ecf8e; --err:#ff5c5c; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font:15px/1.5 -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif; display:flex; justify-content:center; padding:48px 16px; }
+  main { width:100%; max-width:560px; }
+  h1 { font-size:24px; margin:0 0 4px; letter-spacing:-.02em; }
+  p.sub { margin:0 0 28px; color:var(--muted); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:0 0 6px; }
+  input, select { width:100%; background:#0f1115; color:var(--text); border:1px solid var(--line); border-radius:10px; padding:12px 14px; font:inherit; outline:none; }
+  input:focus, select:focus { border-color:var(--accent); }
+  .row { display:grid; grid-template-columns:1fr auto; gap:10px; margin-top:14px; align-items:end; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:12px 18px; font:inherit; font-weight:600; cursor:pointer; white-space:nowrap; }
+  button:disabled { opacity:.5; cursor:default; }
+  button.ghost { background:transparent; border:1px solid var(--line); color:var(--muted); }
+  .status { margin-top:18px; display:none; }
+  .bar { height:8px; background:#0f1115; border-radius:99px; overflow:hidden; border:1px solid var(--line); }
+  .bar > div { height:100%; width:0; background:var(--accent); transition:width .3s; }
+  .meta { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-top:8px; gap:12px; }
+  .meta span:first-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .log { font:12px/1.4 ui-monospace, Menlo, monospace; color:var(--muted); margin-top:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .actions { display:flex; gap:10px; margin-top:16px; }
+  .msg { margin-top:12px; font-size:14px; }
+  .msg.err { color:var(--err); } .msg.ok { color:var(--ok); }
+  details { margin-top:10px; font-size:13px; color:var(--muted); }
+  details li { margin:4px 0; word-break:break-word; }
+  .note { margin-top:20px; font-size:12.5px; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Playlist Zipper</h1>
+  <p class="sub">Paste a public SoundCloud playlist (or track) link, pick a format, get a zip.</p>
+
+  <div class="card">
+    <form id="form">
+      <label for="url">SoundCloud link</label>
+      <input id="url" type="url" required placeholder="https://soundcloud.com/artist/sets/playlist-name" autocomplete="off">
+      <div class="row">
+        <div>
+          <label for="format">Format</label>
+          <select id="format"></select>
+        </div>
+        <button id="go" type="submit">Start</button>
+      </div>
+    </form>
+
+    <div class="status" id="status">
+      <div class="bar"><div id="fill"></div></div>
+      <div class="meta"><span id="title">Fetching playlist…</span><span id="count"></span></div>
+      <div class="log" id="log"></div>
+      <div class="msg" id="msg"></div>
+      <details id="failbox" hidden><summary id="failsum"></summary><ul id="fails"></ul></details>
+      <div class="actions">
+        <button id="dl" hidden>Download zip</button>
+        <button id="cancel" class="ghost" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">“Original” keeps SoundCloud's stream exactly as served — that's the true max quality. WAV/FLAC just change the container; they can't add detail that isn't in the source.</p>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let jobId = null, timer = null;
+
+fetch("/api/formats").then(r => r.json()).then(list => {
+  $("format").innerHTML = list.map(f => `<option value="${f.id}">${f.label}</option>`).join("");
+});
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  reset();
+  $("go").disabled = true;
+  $("status").style.display = "block";
+  const res = await fetch("/api/jobs", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: $("url").value, format: $("format").value }),
+  });
+  const data = await res.json();
+  if (!res.ok) return finish(data.error || "Something went wrong.", true);
+  jobId = data.id;
+  poll();
+});
+
+async function poll() {
+  const res = await fetch(`/api/jobs/${jobId}`);
+  const j = await res.json();
+  if (!res.ok) return finish(j.error, true);
+  render(j);
+  if (j.status === "running") timer = setTimeout(poll, 1000);
+  else if (j.status === "done") finish(`Done — ${j.done} track${j.done === 1 ? "" : "s"} ready.`, false, true);
+  else if (j.status === "cancelled") finish("Cancelled.", true);
+  else finish(j.failed[0] || "Nothing could be downloaded.", true);
+}
+
+function render(j) {
+  $("title").textContent = j.title || "Fetching playlist…";
+  const total = j.total || 0;
+  $("count").textContent = total ? `${j.done} / ${total}` : (j.done ? `${j.done}` : "");
+  $("fill").style.width = total ? `${Math.round((j.done / total) * 100)}%` : (j.status === "done" ? "100%" : "4%");
+  $("log").textContent = j.lastLine;
+  if (j.failed.length) {
+    $("failbox").hidden = false;
+    $("failsum").textContent = `${j.failed.length} track(s) skipped`;
+    $("fails").innerHTML = j.failed.map(f => `<li>${f.replace(/[<>&]/g, c => ({ "<":"&lt;", ">":"&gt;", "&":"&amp;" }[c]))}</li>`).join("");
+  }
+}
+
+function finish(text, isErr, ok) {
+  clearTimeout(timer);
+  $("go").disabled = false;
+  $("cancel").hidden = true;
+  $("msg").textContent = text || "";
+  $("msg").className = "msg " + (isErr ? "err" : "ok");
+  if (ok) { $("dl").hidden = false; $("fill").style.width = "100%"; $("log").textContent = ""; }
+}
+
+function reset() {
+  clearTimeout(timer);
+  jobId = null;
+  $("msg").textContent = ""; $("log").textContent = "";
+  $("fill").style.width = "0"; $("count").textContent = ""; $("title").textContent = "Fetching playlist…";
+  $("dl").hidden = true; $("cancel").hidden = false;
+  $("failbox").hidden = true; $("fails").innerHTML = "";
+}
+
+$("dl").onclick = () => { if (jobId) location.href = `/api/jobs/${jobId}/download`; };
+$("cancel").onclick = () => { if (jobId) fetch(`/api/jobs/${jobId}/cancel`, { method: "POST" }); };
+</script>
+</body>
+</html>

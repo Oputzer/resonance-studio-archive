@@ -1,0 +1,5 @@
+{
+  "name": "soundcloud-zip",
+  "private": true,
+  "scripts": { "start": "node server.js" }
+}
