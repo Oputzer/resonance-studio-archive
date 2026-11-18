@@ -76,7 +76,7 @@ final class DownloadJob: ObservableObject, Identifiable {
             completed = saved.count
             currentProgress = 0
             if coverURL == nil, let folder {
-                let art = folder.appendingPathComponent(".fmf/art/\(id).jpg")
+                let art = folder.appendingPathComponent(".resonance/art/\(id).jpg")
                 if FileManager.default.fileExists(atPath: art.path) { coverURL = art }
             }
         default:
@@ -141,7 +141,7 @@ final class DownloadCenter: ObservableObject {
 
     private func run(_ job: DownloadJob) async {
         guard let tools = Tools.locate() else {
-            job.state = .failed("FMF's helper tools are missing. Open Settings to fix this.")
+            job.state = .failed("Resonance Studio's helper tools are missing. Open Settings to fix this.")
             return
         }
         do {
@@ -199,7 +199,7 @@ enum Downloader {
         guard result.status == 0,
               let obj = try? JSONSerialization.jsonObject(with: result.out) as? [String: Any] else {
             let reason = result.err.split(separator: "\n").last { $0.hasPrefix("ERROR") }.map { DownloadJob.clean(error: String($0)) }
-            throw FMFError(reason ?? "Couldn't open that link. Make sure it's public.")
+            throw AppError(reason ?? "Couldn't open that link. Make sure it's public.")
         }
         let isPlaylist = (obj["_type"] as? String) == "playlist"
         let entries = isPlaylist ? (obj["entries"] as? [[String: Any]] ?? []) : [obj]
@@ -209,7 +209,7 @@ enum Downloader {
             if let id = (e["id"] as? String) ?? (e["id"] as? NSNumber)?.stringValue, let t = e["title"] as? String { titles[id] = t }
         }
         if count == 0 {
-            throw FMFError("This playlist has no downloadable songs. The uploader may have blocked them.")
+            throw AppError("This playlist has no downloadable songs. The uploader may have blocked them.")
         }
         return Probe(
             title: (obj["title"] as? String)?.nilIfBlank ?? "SoundCloud",
@@ -221,7 +221,7 @@ enum Downloader {
         )
     }
 
-    /// Desktop › FMF › "<Playlist name> — <yyyy-MM-dd>"
+    /// Desktop › Resonance Studio › "<Playlist name> — <yyyy-MM-dd>"
     static func makeFolder(for title: String) throws -> URL {
         let fm = FileManager.default
         let root = Paths.libraryRoot
@@ -238,8 +238,8 @@ enum Downloader {
             n += 1
         }
         let folder = root.appendingPathComponent(name, isDirectory: true)
-        try fm.createDirectory(at: folder.appendingPathComponent(".fmf/info"), withIntermediateDirectories: true)
-        try fm.createDirectory(at: folder.appendingPathComponent(".fmf/art"), withIntermediateDirectories: true)
+        try fm.createDirectory(at: folder.appendingPathComponent(".resonance/info"), withIntermediateDirectories: true)
+        try fm.createDirectory(at: folder.appendingPathComponent(".resonance/art"), withIntermediateDirectories: true)
         return folder
     }
 
@@ -267,10 +267,10 @@ enum Downloader {
             "--progress-template", "download:PROG\t%(info.id)s\t%(progress.downloaded_bytes|0)s\t%(progress.total_bytes,progress.total_bytes_estimate|0)s",
             "-P", folder.path,
             "-o", isPlaylist ? "%(playlist_index)02d - %(title)s.%(ext)s" : "%(title)s.%(ext)s",
-            "-o", "thumbnail:.fmf/art/%(id)s.%(ext)s",
-            "-o", "infojson:.fmf/info/%(id)s",
-            "-o", "pl_thumbnail:.fmf/art/playlist.%(ext)s",
-            "-o", "pl_infojson:.fmf/info/playlist",
+            "-o", "thumbnail:.resonance/art/%(id)s.%(ext)s",
+            "-o", "infojson:.resonance/info/%(id)s",
+            "-o", "pl_thumbnail:.resonance/art/playlist.%(ext)s",
+            "-o", "pl_infojson:.resonance/info/playlist",
             job.url,
         ]
         return try await Shell.stream(tools.ytdlp, args, env: tools.environment,
@@ -280,8 +280,8 @@ enum Downloader {
 
     @MainActor
     static func buildManifest(job: DownloadJob, probe: Probe, folder: URL) -> PlaylistManifest {
-        let infoDir = folder.appendingPathComponent(".fmf/info")
-        let artDir = folder.appendingPathComponent(".fmf/art")
+        let infoDir = folder.appendingPathComponent(".resonance/info")
+        let artDir = folder.appendingPathComponent(".resonance/art")
         var tracks: [TrackMeta] = []
         for (position, id) in job.savedOrder.enumerated() {
             guard let path = job.saved[id], FileManager.default.fileExists(atPath: path) else { continue }
@@ -307,7 +307,7 @@ enum Downloader {
     /// WAV can't carry artwork through FFmpeg, so write the ID3 tag ourselves.
     static func tagWAVFiles(folder: URL, manifest: PlaylistManifest) async {
         let jobs = manifest.tracks.map { t -> (URL, WAVTagger.Tags) in
-            let art = t.artworkFile.flatMap { try? Data(contentsOf: folder.appendingPathComponent(".fmf/art/\($0)")) }
+            let art = t.artworkFile.flatMap { try? Data(contentsOf: folder.appendingPathComponent(".resonance/art/\($0)")) }
             let tags = WAVTagger.Tags(title: t.title, artist: t.artist,
                                       album: manifest.isSingleTrack ? nil : manifest.title,
                                       track: manifest.isSingleTrack ? nil : t.index, artwork: art)

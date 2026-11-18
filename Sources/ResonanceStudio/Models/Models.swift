@@ -1,6 +1,6 @@
 import Foundation
 
-struct FMFError: LocalizedError {
+struct AppError: LocalizedError {
     let message: String
     init(_ message: String) { self.message = message }
     var errorDescription: String? { message }
@@ -109,13 +109,13 @@ struct PlaylistManifest: Codable, Hashable {
     static let fileName = "playlist.json"
 
     static func load(from folder: URL) -> PlaylistManifest? {
-        let url = folder.appendingPathComponent(".fmf/\(fileName)")
+        let url = folder.appendingPathComponent(".resonance/\(fileName)")
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? JSON.decoder.decode(PlaylistManifest.self, from: data)
     }
 
     func save(to folder: URL) throws {
-        let dir = folder.appendingPathComponent(".fmf", isDirectory: true)
+        let dir = folder.appendingPathComponent(".resonance", isDirectory: true)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         try JSON.encoder.encode(self).write(to: dir.appendingPathComponent(Self.fileName), options: .atomic)
     }
@@ -128,7 +128,7 @@ struct LibraryPlaylist: Identifiable, Hashable {
     var id: URL { folder }
 
     var coverURL: URL? {
-        let cover = folder.appendingPathComponent(".fmf/art/playlist.jpg")
+        let cover = folder.appendingPathComponent(".resonance/art/playlist.jpg")
         if FileManager.default.fileExists(atPath: cover.path) { return cover }
         return manifest.tracks.first.flatMap(artworkURL(for:))
     }
@@ -136,13 +136,13 @@ struct LibraryPlaylist: Identifiable, Hashable {
     func fileURL(for track: TrackMeta) -> URL { folder.appendingPathComponent(track.fileName) }
 
     func artworkURL(for track: TrackMeta) -> URL? {
-        track.artworkFile.map { folder.appendingPathComponent(".fmf/art/\($0)") }
+        track.artworkFile.map { folder.appendingPathComponent(".resonance/art/\($0)") }
     }
 
     /// Prefers the high-resolution catalog cover when one was found.
     func bestArtworkURL(for track: TrackMeta) -> URL? {
         if let file = track.catalog?.artworkFile {
-            let url = folder.appendingPathComponent(".fmf/art/\(file)")
+            let url = folder.appendingPathComponent(".resonance/art/\(file)")
             if FileManager.default.fileExists(atPath: url.path) { return url }
         }
         return artworkURL(for: track)

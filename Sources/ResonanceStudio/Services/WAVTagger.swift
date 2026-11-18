@@ -18,7 +18,7 @@ enum WAVTagger {
 
         guard let header = try handle.read(upToCount: 12), header.count == 12,
               header.prefix(4) == Data("RIFF".utf8), header[8..<12] == Data("WAVE".utf8) else {
-            throw FMFError("Not a WAV file.")
+            throw AppError("Not a WAV file.")
         }
         if try hasID3Chunk(handle) { return }
 

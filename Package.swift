@@ -2,9 +2,9 @@
 import PackageDescription
 
 let package = Package(
-    name: "FMF",
+    name: "ResonanceStudio",
     platforms: [.macOS(.v14)],
     targets: [
-        .executableTarget(name: "FMF", path: "Sources/FMF")
+        .executableTarget(name: "ResonanceStudio", path: "Sources/ResonanceStudio")
     ]
 )

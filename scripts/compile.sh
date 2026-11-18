@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Compiles the FMF executable into build/FMF.
+# Compiles the Resonance Studio executable into build/ResonanceStudio.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p build/vfs
@@ -17,4 +17,4 @@ YAML
   OVERLAY=(-vfsoverlay build/vfs/overlay.yaml -Xcc -ivfsoverlay -Xcc build/vfs/overlay.yaml)
 fi
 swiftc -O -parse-as-library -target arm64-apple-macos14.0 -sdk "$SDK" "${OVERLAY[@]}" \
-  -module-name FMF $(find Sources/FMF -name '*.swift') -o build/FMF
+  -module-name ResonanceStudio $(find Sources/ResonanceStudio -name '*.swift') -o build/ResonanceStudio

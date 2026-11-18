@@ -1,4 +1,4 @@
--- FMF backend schema (Supabase / Postgres).
+-- Resonance Studio backend schema (Supabase / Postgres).
 -- Sign-in uses Supabase Auth email one-time codes. The app writes one profile
 -- row per user recording which version of the Terms they accepted.
 -- Download links are never sent to the server.

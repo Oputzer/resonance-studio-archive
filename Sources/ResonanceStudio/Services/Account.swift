@@ -1,12 +1,12 @@
 import Foundation
 
-/// Talks to the Supabase project configured in Info.plist (FMFBackendURL / FMFBackendKey).
+/// Talks to the Supabase project configured in Info.plist (ResonanceBackendURL / ResonanceBackendKey).
 enum Backend {
     static let baseURL: URL? = {
-        guard let s = (Bundle.main.object(forInfoDictionaryKey: "FMFBackendURL") as? String)?.nilIfBlank else { return nil }
+        guard let s = (Bundle.main.object(forInfoDictionaryKey: "ResonanceBackendURL") as? String)?.nilIfBlank else { return nil }
         return URL(string: s.hasSuffix("/") ? s : s + "/")
     }()
-    static let apiKey: String? = (Bundle.main.object(forInfoDictionaryKey: "FMFBackendKey") as? String)?.nilIfBlank
+    static let apiKey: String? = (Bundle.main.object(forInfoDictionaryKey: "ResonanceBackendKey") as? String)?.nilIfBlank
 
     static var isConfigured: Bool { baseURL != nil && apiKey != nil }
 
@@ -14,7 +14,7 @@ enum Backend {
     static func send(_ path: String, method: String = "POST", body: Any?, token: String? = nil,
                      headers: [String: String] = [:]) async throws -> Data {
         guard let base = baseURL, let key = apiKey, let url = URL(string: path, relativeTo: base) else {
-            throw FMFError("Sign-in isn't available right now.")
+            throw AppError("Sign-in isn't available right now.")
         }
         var req = URLRequest(url: url)
         req.httpMethod = method
@@ -27,9 +27,9 @@ enum Backend {
 
         let data: Data, response: URLResponse
         do { (data, response) = try await URLSession.shared.data(for: req) }
-        catch { throw FMFError("Couldn't reach the server. Check your internet connection.") }
+        catch { throw AppError("Couldn't reach the server. Check your internet connection.") }
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        guard (200..<300).contains(status) else { throw FMFError(errorMessage(data, status: status)) }
+        guard (200..<300).contains(status) else { throw AppError(errorMessage(data, status: status)) }
         return data
     }
 
@@ -122,7 +122,7 @@ final class Account: ObservableObject {
               let access = obj["access_token"] as? String,
               let refresh = obj["refresh_token"] as? String,
               let user = obj["user"] as? [String: Any],
-              let id = user["id"] as? String else { throw FMFError("Unexpected response from the server.") }
+              let id = user["id"] as? String else { throw AppError("Unexpected response from the server.") }
         let expiresIn = (obj["expires_in"] as? NSNumber)?.doubleValue ?? 3600
         return AuthSession(accessToken: access, refreshToken: refresh,
                            expiresAt: Date().addingTimeInterval(expiresIn),
@@ -130,7 +130,7 @@ final class Account: ObservableObject {
     }
 
     func validAccessToken() async throws -> String {
-        guard let s = session else { throw FMFError("Not signed in.") }
+        guard let s = session else { throw AppError("Not signed in.") }
         if s.expiresAt.timeIntervalSinceNow > 120 { return s.accessToken }
         let data = try await Backend.send("auth/v1/token?grant_type=refresh_token", body: ["refresh_token": s.refreshToken])
         let fresh = try Self.parseSession(data)

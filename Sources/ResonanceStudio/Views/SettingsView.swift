@@ -86,7 +86,7 @@ private struct AccountSettings: View {
                 }
             }
             if !Backend.isConfigured {
-                Text("Test build: not connected to the FMF server.")
+                Text("Test build: not connected to the Resonance Studio server.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
@@ -110,8 +110,8 @@ private struct AboutSettings: View {
     var body: some View {
         VStack(spacing: 14) {
             LogoMark(size: 84).shadow(color: Brand.accent.opacity(0.3), radius: 12, y: 5)
-            Text("FMF").font(.title.bold())
-            Text(Brand.fullName).foregroundStyle(.secondary)
+            Text(Brand.fullName).font(.title.bold())
+            Text(Brand.tagline).foregroundStyle(.secondary)
             Text(version).font(.caption).foregroundStyle(.tertiary)
             Text("Built with yt-dlp and FFmpeg. Song details from Apple's iTunes Search API.")
                 .font(.caption)

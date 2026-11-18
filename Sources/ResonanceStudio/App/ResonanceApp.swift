@@ -17,19 +17,22 @@ enum Entry {
             MainActor.assumeIsolated { SelfTest.run(url: args[i + 1], format: args[i + 2]) }
             RunLoop.main.run()
         }
-        FMFApp.main()
+        ResonanceApp.main()
     }
 }
 
-struct FMFApp: App {
+struct ResonanceApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var account = Account()
-    @StateObject private var library = Library()
+    @StateObject private var library: Library = {
+        Paths.migrateLegacyLibrary()
+        return Library()
+    }()
     @StateObject private var downloads = DownloadCenter()
     @StateObject private var player = Player()
 
     var body: some Scene {
-        Window("FMF", id: "main") {
+        Window("Resonance Studio", id: "main") {
             RootView()
                 .environmentObject(account)
                 .environmentObject(library)
@@ -39,7 +42,8 @@ struct FMFApp: App {
                 .frame(minWidth: 940, idealWidth: 1120, maxWidth: .infinity,
                        minHeight: 640, idealHeight: 740, maxHeight: .infinity)
                 .onAppear {
-                    // The library folder (Desktop › FMF by default) always exists.
+                    // The library folder (Desktop › Resonance Studio by default) always exists.
+                    Paths.migrateLegacyLibrary()
                     try? FileManager.default.createDirectory(at: Paths.libraryRoot, withIntermediateDirectories: true)
                     downloads.attach(library: library)
                     library.enrichAllPending()
@@ -50,7 +54,7 @@ struct FMFApp: App {
         .commands {
             CommandGroup(replacing: .newItem) {}
             CommandGroup(replacing: .help) {
-                Button("FMF Terms of Use") { NotificationCenter.default.post(name: .showTerms, object: nil) }
+                Button("Resonance Studio Terms of Use") { NotificationCenter.default.post(name: .showTerms, object: nil) }
             }
         }
 
@@ -73,5 +77,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension Notification.Name {
-    static let showTerms = Notification.Name("FMFShowTerms")
+    static let showTerms = Notification.Name("ResonanceShowTerms")
 }

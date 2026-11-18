@@ -55,9 +55,9 @@ private struct WelcomeStep: View {
             LogoMark(size: 120)
                 .shadow(color: Brand.accent.opacity(0.35), radius: 24, y: 10)
             VStack(spacing: 8) {
-                Text("Welcome to FMF")
+                Text("Welcome to Resonance Studio")
                     .font(.system(size: 34, weight: .bold))
-                Text("Free Music Foundation")
+                Text("Music that stays with you.")
                     .font(.title3)
                     .foregroundStyle(.secondary)
             }
@@ -67,7 +67,7 @@ private struct WelcomeStep: View {
                 Feature(symbol: "photo.fill", title: "Artwork and details",
                         text: "Cover art, release dates, genres, play counts and more, built in.")
                 Feature(symbol: "folder.fill", title: "Your library, on your Mac",
-                        text: "In an FMF folder on your Desktop, one dated folder per playlist.")
+                        text: "In a Resonance Studio folder on your Desktop, one dated folder per playlist.")
             }
             .padding(.vertical, 8)
             Button(action: next) {
@@ -105,7 +105,7 @@ private struct TermsStep: View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Terms of Use").font(.system(size: 28, weight: .bold))
-                Text("Please read these carefully. You need to accept them to use FMF.")
+                Text("Please read these carefully. You need to accept them to use Resonance Studio.")
                     .foregroundStyle(.secondary)
             }
             ScrollView {
@@ -116,7 +116,7 @@ private struct TermsStep: View {
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(Color.primary.opacity(0.1)))
 
             Toggle(isOn: $agreed) {
-                Text("I have read and agree to the Terms of Use and Privacy Policy. I understand that I am responsible for what I download and I accept all legal risk of using FMF.")
+                Text("I have read and agree to the Terms of Use and Privacy Policy. I understand that I am responsible for what I download and I accept all legal risk of using Resonance Studio.")
                     .fixedSize(horizontal: false, vertical: true)
             }
             .toggleStyle(.checkbox)

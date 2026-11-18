@@ -2,14 +2,14 @@ import SwiftUI
 
 enum Legal {
     /// Bump this whenever TERMS.md changes; everyone is asked to accept again.
-    static let version = "2026-11-18"
+    static let version = "2026-11-18.2"
 
     static var termsMarkdown: String {
         if let url = Bundle.main.url(forResource: "Terms", withExtension: "md"),
            let text = try? String(contentsOf: url, encoding: .utf8) {
             return text
         }
-        return "The Terms of Use could not be loaded. Please reinstall FMF."
+        return "The Terms of Use could not be loaded. Please reinstall Resonance Studio."
     }
 }
 

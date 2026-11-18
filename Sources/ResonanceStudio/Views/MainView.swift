@@ -62,7 +62,7 @@ struct MainView: View {
         }
         .onAppear {
             // Used when taking README screenshots.
-            if ProcessInfo.processInfo.environment["FMF_OPEN_FIRST"] != nil, let first = library.playlists.first {
+            if ProcessInfo.processInfo.environment["RESONANCE_OPEN_FIRST"] != nil, let first = library.playlists.first {
                 selection = .playlist(first.folder)
             }
         }
@@ -308,7 +308,7 @@ private struct ToolsMissingCard: View {
                 .foregroundStyle(.orange)
             VStack(alignment: .leading, spacing: 8) {
                 Text("One-time setup needed").font(.headline)
-                Text("FMF uses two free tools, yt-dlp and FFmpeg, to save and convert audio. Install them with Homebrew by running this in Terminal:")
+                Text("Resonance Studio uses two free tools, yt-dlp and FFmpeg, to save and convert audio. Install them with Homebrew by running this in Terminal:")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack {

@@ -1,7 +1,7 @@
 import Foundation
 
-/// `FMF --selftest <url> <format>` runs a real download without the window and prints the result.
-/// Set FMF_LIBRARY to keep test downloads out of the real library.
+/// `ResonanceStudio --selftest <url> <format>` runs a real download without the window and prints the result.
+/// Set RESONANCE_LIBRARY to keep test downloads out of the real library.
 @MainActor
 enum SelfTest {
     private static var library: Library!

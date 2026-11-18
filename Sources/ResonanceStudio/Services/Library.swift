@@ -10,7 +10,10 @@ final class Library: ObservableObject {
 
     func reload() {
         let fm = FileManager.default
+        // Retried here because macOS only allows Desktop access once the person approves it.
+        Paths.migrateLegacyLibrary()
         let root = Paths.libraryRoot
+        try? fm.createDirectory(at: root, withIntermediateDirectories: true)
         let folders = (try? fm.contentsOfDirectory(at: root, includingPropertiesForKeys: [.isDirectoryKey],
                                                    options: [.skipsHiddenFiles])) ?? []
         let found = folders.compactMap { folder -> LibraryPlaylist? in
@@ -133,7 +136,7 @@ actor Catalog {
               let (data, response) = try? await URLSession.shared.data(from: url),
               (response as? HTTPURLResponse)?.statusCode == 200, data.count > 1000 else { return nil }
         let name = "\(trackID)-catalog.jpg"
-        let dest = folder.appendingPathComponent(".fmf/art/\(name)")
+        let dest = folder.appendingPathComponent(".resonance/art/\(name)")
         return (try? data.write(to: dest, options: .atomic)) != nil ? name : nil
     }
 

@@ -2,50 +2,34 @@ import AppKit
 import SwiftUI
 
 enum Brand {
-    static let name = "FMF"
-    static let fullName = "Free Music Foundation"
-    static let accent = Color(red: 0.43, green: 0.36, blue: 0.98)
+    static let name = "Resonance"
+    static let fullName = "Resonance Studio"
+    static let tagline = "Music that stays with you."
+    static let accent = Color(red: 0.47, green: 0.30, blue: 0.95)
     static let gradient = LinearGradient(
-        colors: [Color(red: 0.33, green: 0.38, blue: 0.98), Color(red: 0.55, green: 0.33, blue: 0.96), Color(red: 0.80, green: 0.36, blue: 0.90)],
+        colors: [Color(red: 0.25, green: 0.27, blue: 0.86), Color(red: 0.52, green: 0.25, blue: 0.93), Color(red: 0.93, green: 0.36, blue: 0.62)],
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
 }
 
-/// A waveform whose center bar is a download arrow.
-struct WaveArrow: Shape {
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let heights: [CGFloat] = [0.30, 0.56, 0.36, 1.0, 0.36, 0.56, 0.30]
-        let gapRatio: CGFloat = 0.62
-        let barW = rect.width / (CGFloat(heights.count) + CGFloat(heights.count - 1) * gapRatio)
-        let gap = barW * gapRatio
-        for (i, h) in heights.enumerated() {
-            let x = rect.minX + CGFloat(i) * (barW + gap)
-            if i == heights.count / 2 {
-                let cx = x + barW / 2
-                let headH = rect.height * 0.30
-                let headW = barW * 3.1
-                let shaftBottom = rect.maxY - headH * 0.55
-                let shaft = Path(roundedRect: CGRect(x: x, y: rect.minY, width: barW, height: shaftBottom - rect.minY),
-                                 cornerSize: CGSize(width: barW / 2, height: barW / 2))
-                // Rounded triangle: fill the triangle, then add a round-joined outline
-                // of it, inset by half the stroke so the overall size stays the same.
-                let round = barW * 0.55
-                let inset = round / 2
-                var head = Path()
-                head.move(to: CGPoint(x: cx - headW / 2 + inset * 1.6, y: rect.maxY - headH + inset))
-                head.addLine(to: CGPoint(x: cx + headW / 2 - inset * 1.6, y: rect.maxY - headH + inset))
-                head.addLine(to: CGPoint(x: cx, y: rect.maxY - inset * 1.8))
-                head.closeSubpath()
-                let roundedHead = head.union(head.strokedPath(StrokeStyle(lineWidth: round, lineJoin: .round)))
-                p.addPath(shaft.union(roundedHead))
-            } else {
-                let barH = rect.height * h
-                p.addRoundedRect(in: CGRect(x: x, y: rect.midY - barH / 2 - rect.height * 0.06, width: barW, height: barH),
-                                 cornerSize: CGSize(width: barW / 2, height: barW / 2))
+/// A waveform inside a glowing core, with rings of sound spreading outward.
+struct ResonanceGlyph: View {
+    var size: CGFloat
+    var body: some View {
+        let ring = size * 0.034
+        ZStack {
+            Circle().strokeBorder(.white.opacity(0.22), lineWidth: ring).frame(width: size * 0.86, height: size * 0.86)
+            Circle().strokeBorder(.white.opacity(0.45), lineWidth: ring).frame(width: size * 0.68, height: size * 0.68)
+            Circle().fill(.white).frame(width: size * 0.48, height: size * 0.48)
+                .shadow(color: .black.opacity(0.18), radius: size * 0.03, y: size * 0.015)
+            HStack(spacing: size * 0.032) {
+                ForEach(Array([0.34, 0.66, 1.0, 0.66, 0.34].enumerated()), id: \.offset) { _, h in
+                    Capsule().frame(width: size * 0.042, height: size * 0.24 * h)
+                }
             }
+            .foregroundStyle(Brand.gradient)
         }
-        return p
+        .frame(width: size, height: size)
     }
 }
 
@@ -56,13 +40,11 @@ struct LogoMark: View {
             RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
                 .fill(Brand.gradient)
             RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
-                .fill(LinearGradient(colors: [.white.opacity(0.22), .clear], startPoint: .top, endPoint: .center))
-            WaveArrow()
-                .fill(.white)
-                .shadow(color: .black.opacity(0.18), radius: size * 0.02, y: size * 0.01)
-                .frame(width: size * 0.56, height: size * 0.50)
+                .fill(RadialGradient(colors: [.white.opacity(0.28), .clear], center: .center, startRadius: 0, endRadius: size * 0.5))
+            ResonanceGlyph(size: size * 0.82)
         }
         .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.225, style: .continuous))
     }
 }
 
@@ -73,8 +55,8 @@ struct LogoLockup: View {
             LogoMark(size: height)
                 .shadow(color: .black.opacity(0.2), radius: height * 0.08, y: height * 0.04)
             VStack(alignment: .leading, spacing: height * 0.02) {
-                Text("FMF").font(.system(size: height * 0.52, weight: .heavy, design: .rounded))
-                Text("Free Music Foundation").font(.system(size: height * 0.2, weight: .medium)).foregroundStyle(.secondary)
+                Text("Resonance").font(.system(size: height * 0.48, weight: .bold, design: .rounded))
+                Text("STUDIO").font(.system(size: height * 0.17, weight: .semibold)).tracking(height * 0.09).foregroundStyle(.secondary)
             }
         }
     }
