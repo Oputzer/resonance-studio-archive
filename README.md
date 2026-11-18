@@ -10,6 +10,21 @@
   <img src="assets/screenshot-download.png" alt="Resonance Studio new download screen" width="800">
 </p>
 
+## Download
+
+**[Download the latest version](https://github.com/Oputzer/resonance-studio/releases/latest)** and choose `Resonance-Studio-<version>.dmg`.
+
+1. Open the downloaded `.dmg` file.
+2. Drag **Resonance Studio** onto the **Applications** folder next to it.
+3. Open Resonance Studio from your Applications folder.
+
+The first time you open it, macOS says it can't verify the app, because it isn't distributed through the App Store. To allow it (you only do this once):
+
+- **macOS 15 Sequoia and later:** click **Done**, then open **System Settings › Privacy & Security**, scroll down, click **Open Anyway** next to Resonance Studio, and confirm.
+- **macOS 14 Sonoma:** right-click the app in Applications, choose **Open**, then click **Open** again.
+
+Prefer a zip? Download `Resonance-Studio-<version>.zip` instead, double-click it, and drag the app into Applications.
+
 ## Features
 
 - **Paste a link, get the playlist.** Works with public SoundCloud playlists and single songs.
@@ -32,25 +47,23 @@
 
 ## Requirements
 
-- macOS 14 Sonoma or later, on Apple silicon
+- macOS 14 Sonoma or later, on an Apple silicon or Intel Mac
 - An internet connection the first time you open the app
 
 That's it. On first launch, Resonance Studio sets itself up by downloading the two free audio tools it uses, [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [FFmpeg](https://ffmpeg.org) (about 95 MB, one time). Each download is checked against its published SHA-256 checksum before it's installed. yt-dlp keeps itself up to date automatically, so SoundCloud downloads keep working. Nothing needs to be typed into Terminal.
 
 If you already have yt-dlp and FFmpeg installed with Homebrew, the app uses those instead.
 
-## Build
+## Build from source
 
 Resonance Studio builds with the Xcode Command Line Tools. Xcode itself is not required.
 
 ```sh
 git clone https://github.com/Oputzer/resonance-studio.git
 cd resonance-studio
-scripts/build-app.sh
-open "build/Resonance Studio.app"
+scripts/build-app.sh      # builds "build/Resonance Studio.app"
+scripts/package.sh        # also makes the .dmg and .zip in dist/
 ```
-
-To install it, drag `build/Resonance Studio.app` into your Applications folder. The app is not notarized, so the first time you open it, right-click it and choose **Open**.
 
 ## Accounts and backend
 

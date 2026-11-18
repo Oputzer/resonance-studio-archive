@@ -1,5 +1,5 @@
 #!/bin/zsh
-# Compiles the Resonance Studio executable into build/ResonanceStudio.
+# Compiles the Resonance Studio executable into build/ResonanceStudio (universal).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p build/vfs
@@ -16,5 +16,13 @@ if [[ -f $CLT_SWIFT/module.modulemap && -f $CLT_SWIFT/bridging.modulemap ]]; the
 YAML
   OVERLAY=(-vfsoverlay build/vfs/overlay.yaml -Xcc -ivfsoverlay -Xcc build/vfs/overlay.yaml)
 fi
-swiftc -O -parse-as-library -target arm64-apple-macos14.0 -sdk "$SDK" "${OVERLAY[@]}" \
-  -module-name ResonanceStudio $(find Sources/ResonanceStudio -name '*.swift') -o build/ResonanceStudio
+# Builds a universal binary (Apple silicon + Intel). Set ARCHS=arm64 for a faster local build.
+ARCHS=(${=ARCHS:-arm64 x86_64})
+SLICES=()
+for arch in $ARCHS; do
+  swiftc -O -parse-as-library -target $arch-apple-macos14.0 -sdk "$SDK" "${OVERLAY[@]}" \
+    -module-name ResonanceStudio $(find Sources/ResonanceStudio -name '*.swift') -o build/ResonanceStudio-$arch
+  SLICES+=(build/ResonanceStudio-$arch)
+done
+lipo -create "${SLICES[@]}" -output build/ResonanceStudio
+rm -f "${SLICES[@]}"

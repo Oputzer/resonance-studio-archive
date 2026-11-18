@@ -6,3 +6,4 @@ web/jobs/
 *.xcodeproj/xcuserdata/
 .swiftpm/
 vendor/
+dist/
