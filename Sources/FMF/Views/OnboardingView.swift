@@ -67,7 +67,7 @@ private struct WelcomeStep: View {
                 Feature(symbol: "photo.fill", title: "Artwork and details",
                         text: "Cover art, release dates, genres, play counts and more, built in.")
                 Feature(symbol: "folder.fill", title: "Your library, on your Mac",
-                        text: "Neatly organized in Music › FMF, one dated folder per playlist.")
+                        text: "In an FMF folder on your Desktop, one dated folder per playlist.")
             }
             .padding(.vertical, 8)
             Button(action: next) {

@@ -17,10 +17,10 @@
 - **Cover art built in.** Full-resolution artwork is embedded in every MP3, AAC, and FLAC file, and saved as `cover.jpg` in each playlist folder.
 - **Rich song details.** Artist, genre, upload date, plays, likes, reposts, license, and description from SoundCloud. When a song is also in Apple's music catalog, FMF adds the official album name, release date, track number, and a high-resolution album cover.
 - **A real library.** Browse every playlist you've saved, see song details in an info panel, and play songs right inside the app.
-- **A simple folder system.** Everything lives in `Music › FMF`, one folder per download, named with the playlist and the date:
+- **A simple folder system.** Everything lives in an `FMF` folder on your Desktop, created automatically, with one folder per download, named with the playlist and the date:
 
   ```
-  Music/
+  Desktop/
   └── FMF/
       └── Late Night Drive — 2026-11-18/
           ├── 01 - First Song.mp3

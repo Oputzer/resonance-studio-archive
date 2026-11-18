@@ -39,6 +39,8 @@ struct FMFApp: App {
                 .frame(minWidth: 940, idealWidth: 1120, maxWidth: .infinity,
                        minHeight: 640, idealHeight: 740, maxHeight: .infinity)
                 .onAppear {
+                    // The library folder (Desktop › FMF by default) always exists.
+                    try? FileManager.default.createDirectory(at: Paths.libraryRoot, withIntermediateDirectories: true)
                     downloads.attach(library: library, account: account)
                     library.enrichAllPending()
                 }

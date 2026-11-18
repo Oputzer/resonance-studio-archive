@@ -222,7 +222,7 @@ enum Downloader {
         )
     }
 
-    /// Music › FMF › "<Playlist name> — <yyyy-MM-dd>"
+    /// Desktop › FMF › "<Playlist name> — <yyyy-MM-dd>"
     static func makeFolder(for title: String) throws -> URL {
         let fm = FileManager.default
         let root = Paths.libraryRoot

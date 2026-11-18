@@ -4,7 +4,7 @@ enum Paths {
     private static let libraryKey = "libraryPath"
 
     static var defaultLibraryRoot: URL {
-        FileManager.default.urls(for: .musicDirectory, in: .userDomainMask)[0]
+        FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("FMF", isDirectory: true)
     }
 
@@ -23,7 +23,7 @@ enum Paths {
 
     static var displayLibraryPath: String {
         let root = libraryRoot.standardizedFileURL
-        if root == defaultLibraryRoot.standardizedFileURL { return "Music › FMF" }
+        if root == defaultLibraryRoot.standardizedFileURL { return "Desktop › FMF" }
         return root.path.replacingOccurrences(of: NSHomeDirectory(), with: "~")
     }
 
