@@ -14,7 +14,7 @@
 
 - **Paste a link, get the playlist.** Works with public SoundCloud playlists and single songs.
 - **Five formats.** Original (the untouched source stream, best quality), MP3 320 kbps, AAC, WAV, and FLAC.
-- **Cover art built in.** Full-resolution artwork is embedded in every MP3, AAC, and FLAC file, and saved as `cover.jpg` in each playlist folder.
+- **Cover art inside every file.** Full-resolution artwork is embedded directly in each song, in every format, including WAV (as an ID3 tag, the standard that most DJ and music-tagging apps read).
 - **Rich song details.** Artist, genre, upload date, plays, likes, reposts, license, and description from SoundCloud. When a song is also in Apple's music catalog, FMF adds the official album name, release date, track number, and a high-resolution album cover.
 - **A real library.** Browse every playlist you've saved, see song details in an info panel, and play songs right inside the app.
 - **A simple folder system.** Everything lives in an `FMF` folder on your Desktop, created automatically, with one folder per download, named with the playlist and the date:
@@ -24,8 +24,7 @@
   └── FMF/
       └── Late Night Drive — 2026-11-18/
           ├── 01 - First Song.mp3
-          ├── 02 - Second Song.mp3
-          └── cover.jpg
+          └── 02 - Second Song.mp3
   ```
 
   Click **Show in Finder** on any playlist or song to jump straight to it.

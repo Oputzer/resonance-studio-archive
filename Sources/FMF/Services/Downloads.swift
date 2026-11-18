@@ -174,8 +174,10 @@ final class DownloadCenter: ObservableObject {
                 return
             }
             try manifest.save(to: folder)
-            Downloader.writeCover(folder: folder, manifest: manifest)
-            job.coverURL = folder.appendingPathComponent("cover.jpg")
+            if job.format == .wav {
+                await Downloader.tagWAVFiles(folder: folder, manifest: manifest)
+            }
+            job.coverURL = LibraryPlaylist(folder: folder, manifest: manifest).coverURL
             library?.reload()
             job.state = wasCancelled ? .cancelled : .done
             library?.enrich(folder: folder)
@@ -305,14 +307,18 @@ enum Downloader {
         )
     }
 
-    static func writeCover(folder: URL, manifest: PlaylistManifest) {
-        let fm = FileManager.default
-        let dest = folder.appendingPathComponent("cover.jpg")
-        guard !fm.fileExists(atPath: dest.path) else { return }
-        let playlistArt = folder.appendingPathComponent(".fmf/art/playlist.jpg")
-        let source = fm.fileExists(atPath: playlistArt.path) ? playlistArt
-            : manifest.tracks.first?.artworkFile.map { folder.appendingPathComponent(".fmf/art/\($0)") }
-        if let source { try? fm.copyItem(at: source, to: dest) }
+    /// WAV can't carry artwork through FFmpeg, so write the ID3 tag ourselves.
+    static func tagWAVFiles(folder: URL, manifest: PlaylistManifest) async {
+        let jobs = manifest.tracks.map { t -> (URL, WAVTagger.Tags) in
+            let art = t.artworkFile.flatMap { try? Data(contentsOf: folder.appendingPathComponent(".fmf/art/\($0)")) }
+            let tags = WAVTagger.Tags(title: t.title, artist: t.artist,
+                                      album: manifest.isSingleTrack ? nil : manifest.title,
+                                      track: manifest.isSingleTrack ? nil : t.index, artwork: art)
+            return (folder.appendingPathComponent(t.fileName), tags)
+        }
+        await Task.detached(priority: .userInitiated) {
+            for (url, tags) in jobs { try? WAVTagger.embed(tags, into: url) }
+        }.value
     }
 
     private static func readJSON(_ url: URL) -> [String: Any]? {

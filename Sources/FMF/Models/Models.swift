@@ -128,7 +128,7 @@ struct LibraryPlaylist: Identifiable, Hashable {
     var id: URL { folder }
 
     var coverURL: URL? {
-        let cover = folder.appendingPathComponent("cover.jpg")
+        let cover = folder.appendingPathComponent(".fmf/art/playlist.jpg")
         if FileManager.default.fileExists(atPath: cover.path) { return cover }
         return manifest.tracks.first.flatMap(artworkURL(for:))
     }
