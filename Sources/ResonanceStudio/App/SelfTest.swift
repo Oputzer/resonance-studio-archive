@@ -40,4 +40,19 @@ enum SelfTest {
             print(" #\(t.index) \(t.title) | \(t.displayArtist) | genre=\(t.displayGenre ?? "-") | uploaded=\(t.uploadDate.map { "\($0)" } ?? "-") | plays=\(t.playCount ?? -1) | art=\(art) | catalog=\(t.catalog.map { "\($0.trackName) / \($0.albumName ?? "-") / \($0.releaseDate.map { "\($0)" } ?? "-")" } ?? "none") | file=\(t.fileName)")
         }
     }
+
+    /// `ResonanceStudio --selftest-tools` runs the first-launch tool download and reports the result.
+    static func installTools() {
+        let installer = ToolInstaller()
+        Task { @MainActor in
+            let watcher = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+                MainActor.assumeIsolated { print("phase:", installer.phase) }
+            }
+            await installer.install(force: true)
+            watcher.invalidate()
+            print("final:", installer.phase)
+            if let t = Tools.locate() { print("yt-dlp:", t.ytdlp.path); print("ffmpeg:", t.ffmpeg.path) }
+            exit(installer.phase == .ready ? 0 : 1)
+        }
+    }
 }

@@ -13,6 +13,10 @@ enum Entry {
             MainActor.assumeIsolated { BrandRenderer.renderLogo(to: URL(fileURLWithPath: args[i + 1])) }
             exit(0)
         }
+        if args.contains("--selftest-tools") {
+            MainActor.assumeIsolated { SelfTest.installTools() }
+            RunLoop.main.run()
+        }
         if let i = args.firstIndex(of: "--selftest"), i + 2 < args.count {
             MainActor.assumeIsolated { SelfTest.run(url: args[i + 1], format: args[i + 2]) }
             RunLoop.main.run()
@@ -30,6 +34,7 @@ struct ResonanceApp: App {
     }()
     @StateObject private var downloads = DownloadCenter()
     @StateObject private var player = Player()
+    @StateObject private var tools = ToolInstaller()
 
     var body: some Scene {
         Window("Resonance Studio", id: "main") {
@@ -38,6 +43,7 @@ struct ResonanceApp: App {
                 .environmentObject(library)
                 .environmentObject(downloads)
                 .environmentObject(player)
+                .environmentObject(tools)
                 .tint(Brand.accent)
                 .frame(minWidth: 940, idealWidth: 1120, maxWidth: .infinity,
                        minHeight: 640, idealHeight: 740, maxHeight: .infinity)
@@ -62,6 +68,7 @@ struct ResonanceApp: App {
             SettingsView()
                 .environmentObject(account)
                 .environmentObject(library)
+                .environmentObject(tools)
                 .tint(Brand.accent)
         }
     }

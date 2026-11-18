@@ -10,6 +10,7 @@ struct MainView: View {
     @EnvironmentObject private var library: Library
     @EnvironmentObject private var downloads: DownloadCenter
     @EnvironmentObject private var player: Player
+    @EnvironmentObject private var tools: ToolInstaller
     @State private var selection: SidebarItem? = .download
     @State private var trashCandidate: LibraryPlaylist?
 
@@ -66,6 +67,11 @@ struct MainView: View {
                 selection = .playlist(first.folder)
             }
         }
+        .task {
+            // First launch: fetch the two helper tools automatically. Later launches: keep yt-dlp fresh.
+            await tools.installIfNeeded()
+            tools.updateYtdlpIfStale()
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             library.reload()
         }
@@ -100,9 +106,10 @@ private struct SidebarPlaylistRow: View {
 
 struct NewDownloadView: View {
     @EnvironmentObject private var downloads: DownloadCenter
+    @EnvironmentObject private var tools: ToolInstaller
     @AppStorage("defaultFormat") private var formatRaw = AudioFormat.original.rawValue
     @State private var link = ""
-    @State private var toolsMissing = Tools.locate() == nil
+    private var toolsMissing: Bool { tools.phase != .ready }
 
     private var format: AudioFormat { AudioFormat(rawValue: formatRaw) ?? .original }
     private var valid: Bool { DownloadCenter.isSoundCloudLink(link) }
@@ -117,7 +124,7 @@ struct NewDownloadView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                if toolsMissing { ToolsMissingCard { toolsMissing = Tools.locate() == nil } }
+                if toolsMissing { SetupCard() }
 
                 VStack(alignment: .leading, spacing: 20) {
                     HStack(spacing: 10) {
@@ -297,35 +304,43 @@ private struct JobCard: View {
     }
 }
 
-private struct ToolsMissingCard: View {
-    var recheck: () -> Void
-    private let command = "brew install yt-dlp ffmpeg"
+private struct SetupCard: View {
+    @EnvironmentObject private var tools: ToolInstaller
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
-            Image(systemName: "wrench.and.screwdriver.fill")
+            Image(systemName: icon)
                 .font(.title2)
-                .foregroundStyle(.orange)
+                .foregroundStyle(isFailed ? Color.orange : Brand.accent)
+                .frame(width: 28)
             VStack(alignment: .leading, spacing: 8) {
-                Text("One-time setup needed").font(.headline)
-                Text("Resonance Studio uses two free tools, yt-dlp and FFmpeg, to save and convert audio. Install them with Homebrew by running this in Terminal:")
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                HStack {
-                    Text(command).font(.system(.body, design: .monospaced)).textSelection(.enabled)
-                    Spacer()
-                    Button("Copy") {
-                        NSPasteboard.general.clearContents()
-                        NSPasteboard.general.setString(command, forType: .string)
-                    }
+                switch tools.phase {
+                case .working(let step, let progress):
+                    Text("Getting Resonance Studio ready").font(.headline)
+                    Text("One-time setup: downloading the free audio tools it uses (about 95 MB). This only happens once.")
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    ProgressView(value: progress).progressViewStyle(.linear)
+                    Text(step).font(.caption).foregroundStyle(.secondary)
+                case .failed(let message):
+                    Text("Setup didn't finish").font(.headline)
+                    Text(message).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    Button("Try Again") { Task { await tools.install(force: false) } }
+                        .buttonStyle(.borderedProminent)
+                default:
+                    Text("Getting Resonance Studio ready").font(.headline)
+                    Text("One-time setup: downloading the free audio tools it uses (about 95 MB).")
+                        .foregroundStyle(.secondary)
+                    ProgressView().controlSize(.small)
                 }
-                .padding(10)
-                .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
-                Button("Check Again", action: recheck)
             }
+            Spacer(minLength: 0)
         }
         .card()
     }
+
+    private var isFailed: Bool { if case .failed = tools.phase { return true } else { return false } }
+    private var icon: String { isFailed ? "exclamationmark.triangle.fill" : "arrow.down.circle.dotted" }
 }
 
 struct NowPlayingBar: View {

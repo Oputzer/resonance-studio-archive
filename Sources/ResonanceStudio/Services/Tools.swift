@@ -15,7 +15,10 @@ struct Tools {
         if let resources = Bundle.main.resourceURL {
             dirs.append(resources.appendingPathComponent("bin", isDirectory: true))
         }
-        dirs += ["/opt/homebrew/bin", "/usr/local/bin"].map { URL(fileURLWithPath: $0, isDirectory: true) }
+        dirs.append(ToolInstaller.binDir)   // downloaded automatically on first launch
+        if ProcessInfo.processInfo.environment["RESONANCE_TOOLS_ONLY"] == nil {
+            dirs += ["/opt/homebrew/bin", "/usr/local/bin"].map { URL(fileURLWithPath: $0, isDirectory: true) }
+        }
         for dir in dirs {
             let candidate = dir.appendingPathComponent(name)
             if FileManager.default.isExecutableFile(atPath: candidate.path) { return candidate }

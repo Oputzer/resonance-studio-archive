@@ -33,13 +33,11 @@
 ## Requirements
 
 - macOS 14 Sonoma or later, on Apple silicon
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [FFmpeg](https://ffmpeg.org):
+- An internet connection the first time you open the app
 
-  ```sh
-  brew install yt-dlp ffmpeg
-  ```
+That's it. On first launch, Resonance Studio sets itself up by downloading the two free audio tools it uses, [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [FFmpeg](https://ffmpeg.org) (about 95 MB, one time). Each download is checked against its published SHA-256 checksum before it's installed. yt-dlp keeps itself up to date automatically, so SoundCloud downloads keep working. Nothing needs to be typed into Terminal.
 
-  If SoundCloud downloads stop working, update yt-dlp with `brew upgrade yt-dlp`.
+If you already have yt-dlp and FFmpeg installed with Homebrew, the app uses those instead.
 
 ## Build
 

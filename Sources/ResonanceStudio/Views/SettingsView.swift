@@ -16,7 +16,7 @@ private struct GeneralSettings: View {
     @EnvironmentObject private var library: Library
     @AppStorage("defaultFormat") private var formatRaw = AudioFormat.original.rawValue
     @State private var location = Paths.libraryRoot
-    @State private var tools = Tools.locate()
+    @EnvironmentObject private var installer: ToolInstaller
 
     var body: some View {
         Form {
@@ -38,18 +38,22 @@ private struct GeneralSettings: View {
                     }
                 }
             }
-            LabeledContent("Helper tools") {
-                if let tools {
-                    Label("Ready (\(tools.ytdlp.deletingLastPathComponent().path))", systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                } else {
-                    VStack(alignment: .trailing) {
-                        Label("Missing", systemImage: "xmark.circle.fill").foregroundStyle(.red)
-                        Text("Run: brew install yt-dlp ffmpeg").font(.caption).textSelection(.enabled)
-                        Button("Check Again") { tools = Tools.locate() }
+            LabeledContent("Audio tools") {
+                VStack(alignment: .trailing, spacing: 6) {
+                    switch installer.phase {
+                    case .ready:
+                        Label("Ready", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+                    case .working(let step, let progress):
+                        ProgressView(value: progress).frame(width: 160)
+                        Text(step).font(.caption).foregroundStyle(.secondary)
+                    case .failed(let message):
+                        Label("Not installed", systemImage: "xmark.circle.fill").foregroundStyle(.red)
+                        Text(message).font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.trailing)
+                    case .idle:
+                        Text("Not installed yet").foregroundStyle(.secondary)
                     }
+                    Button("Re-download Tools") { Task { await installer.install(force: true) } }
+                        .disabled(installer.isWorking)
                 }
             }
         }
