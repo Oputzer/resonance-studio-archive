@@ -41,7 +41,7 @@ struct FMFApp: App {
                 .onAppear {
                     // The library folder (Desktop › FMF by default) always exists.
                     try? FileManager.default.createDirectory(at: Paths.libraryRoot, withIntermediateDirectories: true)
-                    downloads.attach(library: library, account: account)
+                    downloads.attach(library: library)
                     library.enrichAllPending()
                 }
         }

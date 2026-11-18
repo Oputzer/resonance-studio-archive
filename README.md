@@ -56,7 +56,7 @@ To install it, drag `build/FMF.app` into your Applications folder. The app is no
 
 ## Accounts and backend
 
-FMF asks people to accept the [Terms of Use](legal/TERMS.md) and sign in with their email (a one-time code, no password) before using it. Sign-in and the download log use [Supabase](https://supabase.com):
+FMF asks people to accept the [Terms of Use](legal/TERMS.md) and sign in with their email (a one-time code, no password) before using it. Sign-in uses [Supabase](https://supabase.com). Only the email address and Terms acceptance are stored. Download links never leave the Mac.
 
 1. Create a Supabase project and run [`supabase/schema.sql`](supabase/schema.sql) in its SQL editor.
 2. In **Authentication › Email Templates › Magic Link**, include `{{ .Token }}` so the email contains a 6-digit code.

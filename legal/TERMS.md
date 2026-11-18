@@ -1,6 +1,6 @@
 # FMF Terms of Use and Privacy Policy
 
-Version 2026-11-17 · Effective November 17, 2026
+Version 2026-11-18 · Effective November 18, 2026
 
 These Terms are an agreement between you and the Free Music Foundation ("FMF", "we", "us"). **By downloading, installing, or using the FMF app (the "App"), you agree to these Terms.** If you do not agree, do not download, install, or use the App.
 
@@ -38,20 +38,17 @@ To the fullest extent permitted by law, FMF and its creators, contributors, and 
 
 You need an account, identified by your email address, to use FMF. You must be at least 18 years old, or the age of majority where you live if that is higher. You are responsible for keeping access to your email account secure. We may suspend or end your access to FMF at any time, for any reason, including if we believe you have violated these Terms.
 
-## 8. Privacy: what we collect and who can see it
+## 8. Privacy: what we collect
 
-When you use FMF, we collect and store:
+When you create an account, we collect and store:
 
 - Your email address.
 - The date and version of these Terms that you accepted.
-- **Every link you submit for download**, together with the playlist or song title, the number of songs, the format you chose, and the date and time of the request.
 - The version of the App you are using.
 
-**This information is visible to the operator of FMF, who may review the links you submit and listen to or view the public content those links point to.** We use this information to run, secure, and improve FMF, to prevent abuse, and to comply with legal obligations.
+We use this information to run and secure FMF, prevent abuse, contact you about the App, and comply with legal obligations. We do not sell your information. We may disclose it if required by law, in response to a valid legal request, or to protect the rights and safety of FMF or others.
 
-We do not sell your information. We may disclose it if required by law, in response to a valid legal request, or to protect the rights and safety of FMF or others.
-
-The music files you download stay on your computer. We never receive them.
+**We do not collect or store the links you download, and the music files you download stay on your computer. We never receive them.**
 
 To ask us to delete your information, contact us using the details on the FMF project page. Deleting your information also ends your access to the App.
 

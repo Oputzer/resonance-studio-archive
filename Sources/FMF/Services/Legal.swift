@@ -2,7 +2,7 @@ import SwiftUI
 
 enum Legal {
     /// Bump this whenever TERMS.md changes; everyone is asked to accept again.
-    static let version = "2026-11-17"
+    static let version = "2026-11-18"
 
     static var termsMarkdown: String {
         if let url = Bundle.main.url(forResource: "Terms", withExtension: "md"),

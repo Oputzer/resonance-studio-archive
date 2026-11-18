@@ -12,7 +12,7 @@ enum SelfTest {
         library = Library()
         center = DownloadCenter()
         account = Account()
-        center.attach(library: library, account: account)
+        center.attach(library: library)
         center.start(url: url, format: AudioFormat(rawValue: format) ?? .original)
         guard let job = center.jobs.first else { exit(2) }
 

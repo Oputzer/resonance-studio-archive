@@ -61,7 +61,6 @@ final class Account: ObservableObject {
 
     private let defaults = UserDefaults.standard
     private var sessionFile: URL { Paths.support.appendingPathComponent("session.json") }
-    private var pendingFile: URL { Paths.support.appendingPathComponent("pending-submissions.json") }
 
     init() {
         acceptedTermsVersion = defaults.string(forKey: "termsVersion")
@@ -101,7 +100,6 @@ final class Account: ObservableObject {
         let s = try Self.parseSession(data)
         store(s)
         await recordTermsAcceptance()
-        await flushPending()
     }
 
     func signOut() {
@@ -153,45 +151,5 @@ final class Account: ObservableObject {
         ]
         try? await Backend.send("rest/v1/profiles?on_conflict=id", body: body, token: token,
                                 headers: ["Prefer": "resolution=merge-duplicates,return=minimal"])
-    }
-
-    /// Every link submitted for download is recorded, as described in the Terms.
-    func logSubmission(url: String, format: AudioFormat, title: String, trackCount: Int) {
-        guard Backend.isConfigured else { return }
-        let row: [String: Any] = [
-            "url": url,
-            "format": format.rawValue,
-            "title": title,
-            "track_count": trackCount,
-            "email": email ?? "",
-            "submitted_at": ISO8601DateFormatter().string(from: Date()),
-        ]
-        Task {
-            var queue = loadPending()
-            queue.append(row)
-            savePending(queue)
-            await flushPending()
-        }
-    }
-
-    private func flushPending() async {
-        var queue = loadPending()
-        guard !queue.isEmpty, let token = try? await validAccessToken() else { return }
-        while let row = queue.first {
-            do {
-                try await Backend.send("rest/v1/submissions", body: row, token: token, headers: ["Prefer": "return=minimal"])
-                queue.removeFirst()
-                savePending(queue)
-            } catch { break }
-        }
-    }
-
-    private func loadPending() -> [[String: Any]] {
-        guard let data = try? Data(contentsOf: pendingFile) else { return [] }
-        return (try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]) ?? []
-    }
-
-    private func savePending(_ rows: [[String: Any]]) {
-        if let data = try? JSONSerialization.data(withJSONObject: rows) { try? data.write(to: pendingFile, options: .atomic) }
     }
 }

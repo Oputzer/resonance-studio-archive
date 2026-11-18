@@ -108,13 +108,11 @@ final class DownloadCenter: ObservableObject {
     @Published var openRequest: URL?
 
     private weak var library: Library?
-    private weak var account: Account?
 
     var activeCount: Int { jobs.filter(\.isActive).count }
 
-    func attach(library: Library, account: Account) {
+    func attach(library: Library) {
         self.library = library
-        self.account = account
     }
 
     static func isSoundCloudLink(_ raw: String) -> Bool {
@@ -155,7 +153,6 @@ final class DownloadCenter: ObservableObject {
 
             let folder = try Downloader.makeFolder(for: probe.title)
             job.folder = folder
-            account?.logSubmission(url: job.url, format: job.format, title: probe.title, trackCount: probe.count)
 
             job.state = .downloading
             _ = try await Downloader.download(job: job, folder: folder, tools: tools, isPlaylist: probe.isPlaylist)
